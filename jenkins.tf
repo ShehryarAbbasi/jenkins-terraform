@@ -7,14 +7,11 @@
 *********************************/
   # cd C:\ZDrive\workspace\tuppence-terraform
  
-  # To build:  mvn clean install –U
-
-  # To see all dependencies and versions:  mvn dependency:tree
-
-  # To build eclipse project mvn eclipse:eclipse
+  # To build:                               mvn clean install –U
+  # To see all dependencies and versions:   mvn dependency:tree
+  # To build eclipse project mvn eclipse:   eclipse
 
   # See if you can improve performance on the inbound and figure this out:
-
   # - Update S3 to have Lambda pick up the new version of the code.
 
   # http://books.sonatype.com/mvnref-book/reference/
