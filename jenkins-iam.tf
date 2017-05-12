@@ -1,10 +1,10 @@
-resource "aws_iam_instance_profile" "kafka_instance_profile" {
-  name  = "kafka-instance-profile"
-  roles = ["${aws_iam_role.kafka_role.name}"]
+resource "aws_iam_instance_profile" "jenkins_instance_profile" {
+  name  = "jenkins-instance-profile"
+  roles = ["${aws_iam_role.jenkins_role.name}"]
 }
 
-resource "aws_iam_role" "kafka_role" {
-  name = "kafka-role"
+resource "aws_iam_role" "jenkins_role" {
+  name = "jenkins-role"
 
   assume_role_policy = <<EOF
 {
@@ -27,7 +27,7 @@ EOF
 }
 
 resource "aws_iam_policy" "CloudWatchAccess" {
-  name        = "CloudWatchAccess-kafka"
+  name        = "CloudWatchAccess-jenkins"
   description = "CloudWatch Access"
 
   policy = <<EOF
@@ -74,8 +74,8 @@ EOF
 }
 
 resource "aws_iam_policy_attachment" "attach_cloudwatch" {
-  name       = "kafka-iam-attachment"
+  name       = "jenkins-iam-attachment"
   policy_arn = "${aws_iam_policy.CloudWatchAccess.arn}"
-  roles      = ["${aws_iam_role.kafka_role.name}"]
+  roles      = ["${aws_iam_role.jenkins_role.name}"]
 }
 
