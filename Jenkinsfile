@@ -7,7 +7,7 @@ node {
 		
 		sh script: "whoami"
 		
-		sh script: "docker run --rm -v $WORKSPACE:/tmp maven:3.2-jdk-7 /bin/bash -c 'cd /tmp; mvn clean install -U;'", returnStdOut: false
+		sh script: "sudo docker run --rm -v $WORKSPACE:/tmp maven:3.2-jdk-7 /bin/bash -c 'cd /tmp; mvn clean install -U;'", returnStdOut: false
 	}
 }
 def pipeline = fileLoader.fromGit('script.groovy', 
