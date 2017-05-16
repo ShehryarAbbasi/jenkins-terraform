@@ -18,7 +18,6 @@ def buildPipeline() {
 		ansiColor('bash') { 
 		    echo(colorS + "checking out branch: " + env.BRANCH_NAME + colorE)
 		    git_commit = sh script: "git rev-parse  HEAD", returnStdout: true
-		    githubAPI = "https://api.github.com/repos/ShehryarAbbasi/testjenkinsfile/commits/${git_commit.trim()}/comments"
 		    sh script: "ls -l"
 		}
 	    }

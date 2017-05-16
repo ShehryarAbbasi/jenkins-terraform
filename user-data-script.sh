@@ -39,7 +39,26 @@ java -jar jenkins-cli.jar -s http://localhost:8080 who-am-i --username admin --p
 
 # Install Docker so we can run maven on the docker
 sudo yum install -y docker
-sudo service docker start
 sudo usermod -a -G docker ec2-user
-sudo usermod -a -G docker Jenkins
+sudo usermod -a -G docker jenkins
+sudo service docker start
+
+# Make Docker File that will be the Terraform Image
+cd ~
+cat << EOF > Dockerfile
+FROM golang:alpine 
+MAINTAINER "HashiCorp Terraform Team <terraform@hashicorp.com>"
+ENV TERRAFORM_VERSION=0.9.5 
+RUN apk add --update git bash openssh
+ENV TF_DEV=true 
+WORKDIR $GOPATH/src/github.com/hashicorp/terraform
+RUN git clone https://github.com/hashicorp/terraform.git ./ && \
+    git checkout v\${TERRAFORM_VERSION} && \
+    /bin/bash scripts/build.sh
+WORKDIR \$GOPATH
+EOF
+# Build The image. dot means look for the docker file.
+docker build -t tf:latest .
+
+
 
