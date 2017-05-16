@@ -41,4 +41,5 @@ java -jar jenkins-cli.jar -s http://localhost:8080 who-am-i --username admin --p
 sudo yum install -y docker
 sudo service docker start
 sudo usermod -a -G docker ec2-user
+sudo usermod -a -G docker Jenkins
 
