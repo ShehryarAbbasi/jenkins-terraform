@@ -25,7 +25,7 @@
     variable "access_key" {
       description = "Just the access key, Not the secret key"
       type = "string"
-      default = "AKIAIGNOK4NYJLXLKRAQ"
+      //default = "AKIAIGNOK4NYJLXLKRAQ"
     }
     variable "region" {
       description = "Region"
