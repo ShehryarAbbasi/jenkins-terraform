@@ -51,7 +51,7 @@
     variable "SGRemoteCIDRs" {
       description = "List of CIDRS htat allow remote connection and administration"
       type = "list"
-      default = ["64.134.175.0/24", "64.134.220.0/24", "64.43.26.0/24"]
+      default = ["64.134.175.0/24", "64.134.220.0/24", "66.43.26.0/24"]
     }
 
 
