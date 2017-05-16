@@ -1,6 +1,6 @@
 resource "aws_iam_instance_profile" "jenkins_instance_profile" {
   name  = "jenkins-instance-profile"
-  roles = ["${aws_iam_role.jenkins_role.name}"]
+  role = "${aws_iam_role.jenkins_role.name}"
 }
 
 resource "aws_iam_role" "jenkins_role" {

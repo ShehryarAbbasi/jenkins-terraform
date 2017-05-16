@@ -42,19 +42,27 @@ ADMINPASS=$(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)
 MYCRUMB=$(curl -u "admin:$ADMINPASS" 'http://localhost:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')
 curl -L https://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -u "admin:$ADMINPASS"  -H 'Accept: application/json' -H "$MYCRUMB" -d @- http://localhost:8080/updateCenter/byId/default/postBack
 # 
-wget http://localhost:8080/jnlpJars/jenkins-cli.jar
-service jenkins stop
-java -Djenkins.install.runSetupWizard=false -jar /usr/lib/jenkins/jenkins.war &
+cd ~
+# wget http://localhost:8080/jnlpJars/jenkins-cli.jar && service jenkins stop && java -Djenkins.install.runSetupWizard=false -jar /usr/lib/jenkins/jenkins.war &
+curl -O http://localhost:8080/jnlpJars/jenkins-cli.jar 
+sudo service jenkins stop
+sudo java -Djenkins.install.runSetupWizard=false -jar /usr/lib/jenkins/jenkins.war &
 
 while ! echo exit | nc -z -w 3 localhost 8080; do sleep 3; done
 while curl -s http://localhost:8080 | grep "Please wait"; do echo "Waiting for Jenkins to start.." && sleep 3; done
 echo "Jenkins started"
 # 
-java -jar jenkins-cli.jar -s http://localhost:8080 install-plugin workflow-remote-loader ansicolor 
-java -jar jenkins-cli.jar -s http://localhost:8080 safe-restart
+sudo java -jar jenkins-cli.jar -s http://localhost:8080 /
+    install-plugin workflow-remote-loader ansicolor build-pipeline-plugin credentials credentials-binding /
+    build-pipeline-plugin cloudbees-folder git-client git github-api github-oauth github-branch-source github-pullrequest /
+    github job-dsl junit performance workflow-aggregator pipeline-build-step workflow-cps matrix-auth
+sudo java -jar jenkins-cli.jar -s http://localhost:8080 safe-restart
 # curl https://raw.githubusercontent.com/sebastianbergmann/php-jenkins-template/master/config.xml |
 # java -jar jenkins-cli.jar -s http://localhost:8080 create-job php-template
 # java -jar jenkins-cli.jar -s http://localhost:8080 reload-configuration
+
+#curl -Lv https://localhost:8080/login 2>&1 | grep 'X-SSH-Endpoint' < X-SSH-Endpoint: localhost:53801
+
 
 # OK. Jenkins is actually up and running at this point. We can verify this by accessing localhost on port 8080 with curl.
 #curl http://localhost:8080
@@ -82,5 +90,4 @@ EOF
 # Build The image. dot means look for the docker file. The trailing period is required
 docker build -t tf:latest .
 
-
-
+# echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("user1", "pass1")' | java -jar jenkins-cli.jar -auth admin:$ADMINPASS -s http://localhost:8080/ groovy =
