@@ -61,14 +61,14 @@
     }
 
     resource "aws_security_group" "InvokeJenkins" {
-        name        = "InvokeJenkins"
-        description = "Allow Jenkins inbound traffic"
+        name        = "LogInAndInvokeJenkins"
+        description = "Allow inbound traffic to Jenkins from known CIDRs"
 
         ingress {
             from_port   = 22
             to_port     = 8080
             protocol    = "TCP"
-            cidr_blocks = ["64.134.175.0/24"]
+            cidr_blocks = ["64.134.175.0/24", "64.134.220.0/24"]
         }
 
         egress {
@@ -80,27 +80,29 @@
         }
 
         tags {
-            Name = "allow_InvokeJenkins"
+            Name = "allow_LogInAndInvokeJenkins"
         }
     }
 
     resource "aws_instance" "jenkins" {
         ami           = "ami-4191b524"  // TODO Remove Hardcoded
-        instance_type = "t2.xlarge"  // TODO Remove Hardcoded
+        instance_type = "m4.xlarge"  // TODO Remove Hardcoded
         iam_instance_profile = "${aws_iam_instance_profile.jenkins_instance_profile.name}"
         // vpc_security_group_ids = ["sg-888dabf1"] // TODO Remove Hardcoded
         vpc_security_group_ids = ["${aws_security_group.InvokeJenkins.id}"] // TODO Remove Hardcoded
         // subnet_id = "subnet-24f6877c"    // TODO Remove Hardcoded
         associate_public_ip_address = true
         key_name = "Mike-us-east-2-Test"
+        ebs_block_device {
+            device_name = "/dev/xvda"
+            volume_size = "100"
+//            volume_type = "gp2"
+        }
         user_data = "${data.template_file.user_data_script.rendered}"
         tags {
             Name = "Jenkins"
         }
     }
-
-
-
 
 
 
@@ -113,6 +115,11 @@
 
       output "InstanceIP" {
         value         = "${aws_instance.jenkins.public_ip}"
+        description   = "URL of newly created SQS Queue"
+      }
+
+      output "JenkinsURL" {
+        value         = "http://${aws_instance.jenkins.public_ip}:8080"
         description   = "URL of newly created SQS Queue"
       }
 

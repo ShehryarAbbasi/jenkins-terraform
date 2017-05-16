@@ -62,7 +62,8 @@ resource "aws_iam_policy" "CloudWatchAccess" {
                "ec2messages:FailMessage",
                "ec2messages:GetEndpoint",
                "ec2messages:GetMessages",
-               "ec2messages:SendReply"
+               "ec2messages:SendReply",
+               "lambda:*"
             ],
             "Resource": [
                 "*"
