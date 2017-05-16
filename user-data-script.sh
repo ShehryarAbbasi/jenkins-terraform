@@ -3,8 +3,8 @@ sudo yum update -y
 cd /tmp
 
 # Next we'll install nginx to act as our reverse proxy and git because we'll need to checkout sources. We'll also install the Java JDK and configure the system to use it by default.
-sudo rpm -e java-1.7.0-openjdk-1.7.0.131-2.6.9.0.71.amzn1.x86_64
 sudo yum install -y git java-1.8.0-openjdk-devel aws-cli
+sudo rpm -e java-1.7.0-openjdk-1.7.0.131-2.6.9.0.71.amzn1.x86_64
 
 #sudo alternatives --config java
 
@@ -27,12 +27,30 @@ sudo yum install jenkins -y
 
 # Let's start Jenkins up and make sure it starts every time we reboot:
 sudo service jenkins start
-sudo rpm -e java-1.7.0-openjdk-1.7.0.131-2.6.9.0.71.amzn1.x86_64
-sudo service jenkins restart
+#sudo rpm -e java-1.7.0-openjdk-1.7.0.131-2.6.9.0.71.amzn1.x86_64
+#sudo service jenkins restart
 sudo chkconfig --add jenkins
-initialPW=$(sudo cat /var/lib/jenkins/secrets/IntialAdminPassword)
-java -jar jenkins-cli.jar -s http://localhost:8080 who-am-i --username admin --password $initialPW
+# initialPW=$(sudo cat /var/lib/jenkins/secrets/IntialAdminPassword)
+# java -jar jenkins-cli.jar -s http://localhost:8080 who-am-i --username admin --password $initialPW
 
+# Wait for jenkins to start
+while ! echo exit | nc -z -w 3 localhost 8080; do sleep 3; done
+while curl -s http://localhost:8080 | grep "Please wait"; do echo "Waiting for Jenkins to start.." && sleep 3; done
+echo "Jenkins started"
+# 
+ADMINPASS=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
+MYCRUMB=$(curl -u "admin:$ADMINPASS" 'http://localhost:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')
+curl -L https://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -u "admin:$ADMINPASS"  -H 'Accept: application/json' -H "$MYCRUMB" -d @- http://localhost:8080/updateCenter/byId/default/postBack
+# 
+while ! echo exit | nc -z -w 3 localhost 8080; do sleep 3; done
+while curl -s http://localhost:8080 | grep "Please wait"; do echo "Waiting for Jenkins to start.." && sleep 3; done
+echo "Jenkins started"
+# 
+java -jar jenkins-cli.jar -s http://localhost:8080 install-plugin workflow-remote-loader ansicolor 
+java -jar jenkins-cli.jar -s http://localhost:8080 safe-restart
+# curl https://raw.githubusercontent.com/sebastianbergmann/php-jenkins-template/master/config.xml |
+# java -jar jenkins-cli.jar -s http://localhost:8080 create-job php-template
+# java -jar jenkins-cli.jar -s http://localhost:8080 reload-configuration
 
 # OK. Jenkins is actually up and running at this point. We can verify this by accessing localhost on port 8080 with curl.
 #curl http://localhost:8080
@@ -53,11 +71,11 @@ RUN apk add --update git bash openssh
 ENV TF_DEV=true 
 WORKDIR \$GOPATH/src/github.com/hashicorp/terraform
 RUN git clone https://github.com/hashicorp/terraform.git ./ && \
-    git checkout v\${TERRAFORM_VERSION} && \
+    git checkout v\$TERRAFORM_VERSION && \
     /bin/bash scripts/build.sh
 WORKDIR \$GOPATH
 EOF
-# Build The image. dot means look for the docker file.
+# Build The image. dot means look for the docker file. The trailing period is required
 docker build -t tf:latest .
 
 

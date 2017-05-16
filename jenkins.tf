@@ -48,6 +48,12 @@
       type = "string"
       default = "blowder"
     }
+    variable "SGRemoteCIDRs" {
+      description = "List of CIDRS htat allow remote connection and administration"
+      type = "list"
+      default = ["64.134.175.0/24", "64.134.220.0/24", "64.43.26.0/24"]
+    }
+
 
 /********************************
 *
@@ -65,10 +71,17 @@
         description = "Allow inbound traffic to Jenkins from known CIDRs"
 
         ingress {
-            from_port   = 22
+            from_port   = 8080
             to_port     = 8080
             protocol    = "TCP"
-            cidr_blocks = ["64.134.175.0/24", "64.134.220.0/24"]
+            cidr_blocks = "${var.SGRemoteCIDRs}"
+        }
+
+        ingress {
+            from_port   = 22
+            to_port     = 22
+            protocol    = "TCP"
+            cidr_blocks = "${var.SGRemoteCIDRs}"
         }
 
         egress {
